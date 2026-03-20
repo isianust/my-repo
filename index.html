@@ -216,7 +216,7 @@
 
 <script>
 /* ================================================================
-   2048 – Pure JS Engine
+   2048 – Pure JS Engine (fixed up/down directions)
    ================================================================ */
 const SIZE = 4;
 
@@ -279,24 +279,54 @@ function slideRow(row) {
   return { row: a, merged };
 }
 
+/* ── Get a column as an array ────────────────────────────── */
+function getCol(g, c) { return g.map(r => r[c]); }
+function setCol(g, c, col) { for (let r = 0; r < SIZE; r++) g[r][c] = col[r]; }
+
 /* ── Move whole grid ─────────────────────────────────────── */
 function move(dir) {
   // 0=left  1=up  2=right  3=down
   let g = grid.map(r=>[...r]), pts = 0, moved = false;
 
-  const rotate = (g) => g[0].map((_,c) => g.map(r=>r[c]).reverse());
-  let rotations = dir;  // rotate dir times so we always slide left
-  for (let i = 0; i < rotations; i++) g = rotate(g);
-
-  for (let r = 0; r < SIZE; r++) {
-    const { row, merged } = slideRow(g[r]);
-    if (row.some((v,i)=>v!==g[r][i])) moved = true;
-    g[r] = row;
-    pts += merged;
+  if (dir === 0) {
+    // LEFT: slide each row left
+    for (let r = 0; r < SIZE; r++) {
+      const { row, merged } = slideRow(g[r]);
+      if (row.some((v,i) => v !== g[r][i])) moved = true;
+      g[r] = row;
+      pts += merged;
+    }
+  } else if (dir === 2) {
+    // RIGHT: reverse each row, slide left, reverse back
+    for (let r = 0; r < SIZE; r++) {
+      const rev = [...g[r]].reverse();
+      const { row, merged } = slideRow(rev);
+      const result = row.reverse();
+      if (result.some((v,i) => v !== g[r][i])) moved = true;
+      g[r] = result;
+      pts += merged;
+    }
+  } else if (dir === 1) {
+    // UP: treat each column as a row, slide left (toward top)
+    for (let c = 0; c < SIZE; c++) {
+      const col = getCol(g, c);
+      const { row, merged } = slideRow(col);
+      if (row.some((v,i) => v !== col[i])) moved = true;
+      setCol(g, c, row);
+      pts += merged;
+    }
+  } else if (dir === 3) {
+    // DOWN: treat each column reversed, slide left, reverse back
+    for (let c = 0; c < SIZE; c++) {
+      const col = getCol(g, c).reverse();
+      const { row, merged } = slideRow(col);
+      const result = row.reverse();
+      const origCol = getCol(g, c);
+      if (result.some((v,i) => v !== origCol[i])) moved = true;
+      setCol(g, c, result);
+      pts += merged;
+    }
   }
-
-  // rotate back
-  for (let i = 0; i < (4 - rotations) % 4; i++) g = rotate(g);
 
   return { grid: g, points: pts, moved };
 }
