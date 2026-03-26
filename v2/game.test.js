@@ -401,8 +401,8 @@ describe('spawnCoinForStage', () => {
   callCount = 0;
   assert(spawnCoinForStage(5, stage5Bronze) === COIN_TYPES.BRONZE, 'Stage 5: only bronze triggers');
 
-  // Stage 5: all low rolls => bronze (lowest value wins)
-  assert(spawnCoinForStage(5, allLow) === COIN_TYPES.BRONZE, 'Stage 5 all low => bronze (lowest value)');
+  // Stage 5: all low rolls => gold (highest value wins)
+  assert(spawnCoinForStage(5, allLow) === COIN_TYPES.GOLD, 'Stage 5 all low => gold (highest value)');
 });
 
 describe('addRandom', () => {
