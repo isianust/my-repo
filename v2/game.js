@@ -130,9 +130,9 @@ function spawnCoinForStage(stage, randomFn) {
 
   if (candidates.length === 0) return COIN_TYPES.NONE;
 
-  // If multiple coin types trigger, keep the highest value coin.
-  // Bronze (1pt) < Silver (2pt) < Gold (3pt), so pick the largest coin type number.
-  return Math.max(...candidates);
+  // If multiple coin types appear, the block with the lowest point value takes precedence.
+  // Bronze (1pt) < Silver (2pt) < Gold (3pt), so pick the smallest coin type number.
+  return Math.min(...candidates);
 }
 
 /* ── Add random tile ─────────────────────────────────────── */
@@ -187,8 +187,11 @@ function slideRowWithCoins(row, coinRow) {
       const coinA = items[i].coin;
       const coinB = items[i + 1].coin;
       let mergedCoin = COIN_TYPES.NONE;
-      if (coinA !== COIN_TYPES.NONE || coinB !== COIN_TYPES.NONE) {
-        // Keep the higher value coin when merging (or the one that exists)
+      if (coinA !== COIN_TYPES.NONE && coinB !== COIN_TYPES.NONE) {
+        // Both tiles have coins: keep the lower value coin
+        mergedCoin = Math.min(coinA, coinB);
+      } else if (coinA !== COIN_TYPES.NONE || coinB !== COIN_TYPES.NONE) {
+        // Only one tile has a coin: keep whichever exists
         mergedCoin = Math.max(coinA, coinB);
       }
       resultItems.push({ value: mergedValue, coin: mergedCoin });

@@ -222,18 +222,18 @@ describe('slideRowWithCoins', () => {
   const r4 = slideRowWithCoins([2, 2, 0, 0], [1, 1, 0, 0]);
   assertDeepEqual(r4.coinRow, [1, 0, 0, 0], '1+1 = 1 (merge keeps one coin)');
 
-  // Different coin types: gold + bronze -> gold (max)
+  // Different coin types: gold + bronze -> bronze (min)
   const r5 = slideRowWithCoins([4, 4, 0, 0], [3, 1, 0, 0]);
-  assertDeepEqual(r5.coinRow, [3, 0, 0, 0], 'gold+bronze = gold (higher kept)');
+  assertDeepEqual(r5.coinRow, [1, 0, 0, 0], 'gold+bronze = bronze (lower kept)');
 
-  // Silver + gold -> gold (max)
+  // Silver + gold -> silver (min)
   const r6 = slideRowWithCoins([8, 8, 0, 0], [2, 3, 0, 0]);
-  assertDeepEqual(r6.coinRow, [3, 0, 0, 0], 'silver+gold = gold (higher kept)');
+  assertDeepEqual(r6.coinRow, [2, 0, 0, 0], 'silver+gold = silver (lower kept)');
 
   // Multiple merges with coins
   const r7 = slideRowWithCoins([2, 2, 4, 4], [1, 0, 2, 3]);
   assertDeepEqual(r7.row, [4, 8, 0, 0], 'Multiple merge values');
-  assertDeepEqual(r7.coinRow, [1, 3, 0, 0], 'Multiple merge coins: bronze persists, gold wins');
+  assertDeepEqual(r7.coinRow, [1, 2, 0, 0], 'Multiple merge coins: bronze persists, silver wins (min)');
 
   // Non-merging tile keeps coin
   const r8 = slideRowWithCoins([0, 0, 2, 0], [0, 0, 2, 0]);
@@ -401,8 +401,8 @@ describe('spawnCoinForStage', () => {
   callCount = 0;
   assert(spawnCoinForStage(5, stage5Bronze) === COIN_TYPES.BRONZE, 'Stage 5: only bronze triggers');
 
-  // Stage 5: all low rolls => gold (highest value wins)
-  assert(spawnCoinForStage(5, allLow) === COIN_TYPES.GOLD, 'Stage 5 all low => gold (highest value)');
+  // Stage 5: all low rolls => bronze (lowest value wins)
+  assert(spawnCoinForStage(5, allLow) === COIN_TYPES.BRONZE, 'Stage 5 all low => bronze (lowest value)');
 });
 
 describe('addRandom', () => {
@@ -493,21 +493,21 @@ describe('Complex merge scenario: multiple rows', () => {
   ];
 
   const result = moveWithCoins(g, cg, 0); // LEFT
-  // Row 0: [2,2,4,4] => [4,8] coins: [1,2,3,0] => merge(1,2)=2, merge(3,0)=3 => [2,3,0,0]
+  // Row 0: [2,2,4,4] => [4,8] coins: [1,2,3,0] => merge(1,2)=1, merge(3,0)=3 => [1,3,0,0]
   assertDeepEqual(result.grid[0], [4, 8, 0, 0], 'Row 0 merges correctly');
-  assertDeepEqual(result.coinGrid[0], [2, 3, 0, 0], 'Row 0 coins merge correctly');
+  assertDeepEqual(result.coinGrid[0], [1, 3, 0, 0], 'Row 0 coins merge correctly');
 
   // Row 1: [8,8,8,8] => [16,16] coins: [0,1,0,2] => merge(0,1)=1, merge(0,2)=2 => [1,2,0,0]
   assertDeepEqual(result.grid[1], [16, 16, 0, 0], 'Row 1 merges correctly');
   assertDeepEqual(result.coinGrid[1], [1, 2, 0, 0], 'Row 1 coins merge correctly');
 
-  // Row 2: [0,2,0,2] => [4] coins: [0,3,0,1] => merge(3,1)=3 => [3,0,0,0]
+  // Row 2: [0,2,0,2] => [4] coins: [0,3,0,1] => merge(3,1)=1 => [1,0,0,0]
   assertDeepEqual(result.grid[2], [4, 0, 0, 0], 'Row 2 merges correctly');
-  assertDeepEqual(result.coinGrid[2], [3, 0, 0, 0], 'Row 2 coins merge correctly');
+  assertDeepEqual(result.coinGrid[2], [1, 0, 0, 0], 'Row 2 coins merge correctly');
 
-  // Row 3: [4,0,4,0] => [8] coins: [2,0,1,0] => merge(2,1)=2 => [2,0,0,0]
+  // Row 3: [4,0,4,0] => [8] coins: [2,0,1,0] => merge(2,1)=1 => [1,0,0,0]
   assertDeepEqual(result.grid[3], [8, 0, 0, 0], 'Row 3 merges correctly');
-  assertDeepEqual(result.coinGrid[3], [2, 0, 0, 0], 'Row 3 coins merge correctly');
+  assertDeepEqual(result.coinGrid[3], [1, 0, 0, 0], 'Row 3 coins merge correctly');
 });
 
 describe('Complex merge scenario: UP direction', () => {
@@ -525,9 +525,9 @@ describe('Complex merge scenario: UP direction', () => {
   ];
 
   const result = moveWithCoins(g, cg, 1); // UP
-  // Column 0 UP: [2,2,4,4] => [4,8,0,0] coins: [1,2,0,3] => merge(1,2)=2, merge(0,3)=3
+  // Column 0 UP: [2,2,4,4] => [4,8,0,0] coins: [1,2,0,3] => merge(1,2)=1, merge(0,3)=3
   assertDeepEqual(getCol(result.grid, 0), [4, 8, 0, 0], 'Column 0 merges up correctly');
-  assertDeepEqual(getCol(result.coinGrid, 0), [2, 3, 0, 0], 'Column 0 coins merge correctly');
+  assertDeepEqual(getCol(result.coinGrid, 0), [1, 3, 0, 0], 'Column 0 coins merge correctly');
 });
 
 describe('Complex merge scenario: DOWN direction', () => {
@@ -546,10 +546,10 @@ describe('Complex merge scenario: DOWN direction', () => {
 
   const result = moveWithCoins(g, cg, 3); // DOWN
   // Column 0 DOWN: reversed [4,4,2,2] coins reversed [3,0,2,1]
-  // slide: [4,4,2,2] => [8,4,0,0] coins: merge(3,0)=3, merge(2,1)=2 => [3,2,0,0]
-  // reverse back: [0,0,4,8] coins: [0,0,2,3]
+  // slide: [4,4,2,2] => [8,4,0,0] coins: merge(3,0)=3, merge(2,1)=1 => [3,1,0,0]
+  // reverse back: [0,0,4,8] coins: [0,0,1,3]
   assertDeepEqual(getCol(result.grid, 0), [0, 0, 4, 8], 'Column 0 merges down correctly');
-  assertDeepEqual(getCol(result.coinGrid, 0), [0, 0, 2, 3], 'Column 0 coins merge down correctly');
+  assertDeepEqual(getCol(result.coinGrid, 0), [0, 0, 1, 3], 'Column 0 coins merge down correctly');
 });
 
 describe('Complex merge scenario: RIGHT direction', () => {
@@ -568,10 +568,10 @@ describe('Complex merge scenario: RIGHT direction', () => {
 
   const result = moveWithCoins(g, cg, 2); // RIGHT
   // Row 0 RIGHT: reverse [4,4,2,2] coins reverse [2,3,0,1]
-  // slide: [4,4,2,2] => [8,4,0,0] coins: merge(2,3)=3, merge(0,1)=1 => [3,1,0,0]
-  // reverse back: [0,0,4,8] coins: [0,0,1,3]
+  // slide: [4,4,2,2] => [8,4,0,0] coins: merge(2,3)=2, merge(0,1)=1 => [2,1,0,0]
+  // reverse back: [0,0,4,8] coins: [0,0,1,2]
   assertDeepEqual(result.grid[0], [0, 0, 4, 8], 'Row 0 merges right correctly');
-  assertDeepEqual(result.coinGrid[0], [0, 0, 1, 3], 'Row 0 coins merge right correctly');
+  assertDeepEqual(result.coinGrid[0], [0, 0, 1, 2], 'Row 0 coins merge right correctly');
 });
 
 describe('Coin spawning does not affect empty cells', () => {
@@ -630,13 +630,13 @@ describe('Coin merge edge case: three tiles, two merge', () => {
   // [2, 2, 2, 0] LEFT => [4, 2, 0, 0] (first pair merges)
   const r = slideRowWithCoins([2, 2, 2, 0], [1, 2, 3, 0]);
   assertDeepEqual(r.row, [4, 2, 0, 0], 'First pair merges, third stays');
-  assertDeepEqual(r.coinRow, [2, 3, 0, 0], 'Coins: merge(1,2)=2, third slides with coin 3');
+  assertDeepEqual(r.coinRow, [1, 3, 0, 0], 'Coins: merge(1,2)=1, third slides with coin 3');
 });
 
 describe('Coin merge edge case: [4, 2, 2, 4]', () => {
   const r = slideRowWithCoins([4, 2, 2, 4], [1, 2, 3, 0]);
   assertDeepEqual(r.row, [4, 4, 4, 0], 'Middle pair merges');
-  assertDeepEqual(r.coinRow, [1, 3, 0, 0], 'Coins: 1 stays, merge(2,3)=3, 0 stays');
+  assertDeepEqual(r.coinRow, [1, 2, 0, 0], 'Coins: 1 stays, merge(2,3)=2, 0 stays');
 });
 
 // ─────────────────────────────────────────────────────────────
