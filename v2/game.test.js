@@ -84,8 +84,14 @@ describe('Stage definitions', () => {
   assert(STAGES[5].threshold === Infinity, 'Stage 5 threshold is Infinity');
   assert(STAGES[1].coinSpawn === null, 'Stage 1 has no coin spawn');
   assert(STAGES[2].coinSpawn.bronze === 0.30, 'Stage 2 bronze spawn is 30%');
-  assert(STAGES[2].coinSpawn.silver === 0.20, 'Stage 2 silver spawn is 20%');
-  assert(STAGES[2].coinSpawn.gold === 0.10, 'Stage 2 gold spawn is 10%');
+  assert(STAGES[2].coinSpawn.silver === 0, 'Stage 2 silver spawn is 0%');
+  assert(STAGES[2].coinSpawn.gold === 0, 'Stage 2 gold spawn is 0%');
+  assert(STAGES[3].coinSpawn.bronze === 0, 'Stage 3 bronze spawn is 0%');
+  assert(STAGES[3].coinSpawn.silver === 0.20, 'Stage 3 silver spawn is 20%');
+  assert(STAGES[3].coinSpawn.gold === 0, 'Stage 3 gold spawn is 0%');
+  assert(STAGES[4].coinSpawn.bronze === 0, 'Stage 4 bronze spawn is 0%');
+  assert(STAGES[4].coinSpawn.silver === 0, 'Stage 4 silver spawn is 0%');
+  assert(STAGES[4].coinSpawn.gold === 0.10, 'Stage 4 gold spawn is 10%');
   assert(STAGES[5].coinSpawn.bronze === 0.15, 'Stage 5 bronze spawn is 15%');
   assert(STAGES[5].coinSpawn.silver === 0.10, 'Stage 5 silver spawn is 10%');
   assert(STAGES[5].coinSpawn.gold === 0.05, 'Stage 5 gold spawn is 5%');
@@ -366,27 +372,25 @@ describe('spawnCoinForStage', () => {
   // Stage 1: no coins
   assert(spawnCoinForStage(1) === COIN_TYPES.NONE, 'Stage 1 spawns no coins');
 
-  // Stage 2-4: use fixed random for testing
-  // All rolls < thresholds => all candidates, pick lowest (bronze=1)
+  // Stage 2: only bronze can spawn
   const allLow = () => 0.01;
-  assert(spawnCoinForStage(2, allLow) === COIN_TYPES.BRONZE, 'All coins triggered -> lowest value (bronze)');
+  assert(spawnCoinForStage(2, allLow) === COIN_TYPES.BRONZE, 'Stage 2 low roll => bronze (only coin type)');
 
-  // Only gold triggers (roll < 0.10)
-  let callCount = 0;
-  const onlyGold = () => {
-    callCount++;
-    if (callCount === 1) return 0.05; // gold roll < 0.10 => gold candidate
-    if (callCount === 2) return 0.99; // silver roll >= 0.20 => no silver
-    return 0.99; // bronze roll >= 0.30 => no bronze
-  };
-  callCount = 0;
-  assert(spawnCoinForStage(2, onlyGold) === COIN_TYPES.GOLD, 'Only gold triggers => gold');
-
-  // No coins trigger (all rolls high)
+  // Stage 2: high roll => no coin
   const allHigh = () => 0.99;
-  assert(spawnCoinForStage(3, allHigh) === COIN_TYPES.NONE, 'No coins when all rolls high');
+  assert(spawnCoinForStage(2, allHigh) === COIN_TYPES.NONE, 'Stage 2 high roll => no coin');
 
-  // Stage 5 thresholds
+  // Stage 3: only silver can spawn
+  let callCount = 0;
+  const stage3Low = () => 0.01;
+  assert(spawnCoinForStage(3, stage3Low) === COIN_TYPES.SILVER, 'Stage 3 low roll => silver (only coin type)');
+  assert(spawnCoinForStage(3, allHigh) === COIN_TYPES.NONE, 'Stage 3 high roll => no coin');
+
+  // Stage 4: only gold can spawn
+  assert(spawnCoinForStage(4, allLow) === COIN_TYPES.GOLD, 'Stage 4 low roll => gold (only coin type)');
+  assert(spawnCoinForStage(4, allHigh) === COIN_TYPES.NONE, 'Stage 4 high roll => no coin');
+
+  // Stage 5: all coin types can spawn
   callCount = 0;
   const stage5Bronze = () => {
     callCount++;
@@ -396,6 +400,9 @@ describe('spawnCoinForStage', () => {
   };
   callCount = 0;
   assert(spawnCoinForStage(5, stage5Bronze) === COIN_TYPES.BRONZE, 'Stage 5: only bronze triggers');
+
+  // Stage 5: all low rolls => bronze (lowest value wins)
+  assert(spawnCoinForStage(5, allLow) === COIN_TYPES.BRONZE, 'Stage 5 all low => bronze (lowest value)');
 });
 
 describe('addRandom', () => {
@@ -420,7 +427,7 @@ describe('addRandom', () => {
   rIdx = 0;
   const result2 = addRandom(g2, cg2, 2, fakeRand);
   assert(result2 !== null, 'addRandom stage 2 returns result');
-  assert(result2.coin === COIN_TYPES.BRONZE, 'Stage 2 with all-low rolls => bronze (lowest)');
+  assert(result2.coin === COIN_TYPES.BRONZE, 'Stage 2 with low rolls => bronze (only coin type for stage 2)');
 
   // Full grid returns null
   const fullGrid = [

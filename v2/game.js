@@ -57,9 +57,9 @@ const COIN_MULTIPLIERS = {
 /* ── Stage definitions ───────────────────────────────────── */
 const STAGES = {
   1: { threshold: 64,   label: 'Stage 1', coinSpawn: null },
-  2: { threshold: 1024, label: 'Stage 2', coinSpawn: { bronze: 0.30, silver: 0.20, gold: 0.10 } },
-  3: { threshold: 2048, label: 'Stage 3', coinSpawn: { bronze: 0.30, silver: 0.20, gold: 0.10 } },
-  4: { threshold: 4096, label: 'Stage 4', coinSpawn: { bronze: 0.30, silver: 0.20, gold: 0.10 } },
+  2: { threshold: 1024, label: 'Stage 2', coinSpawn: { bronze: 0.30, silver: 0, gold: 0 } },
+  3: { threshold: 2048, label: 'Stage 3', coinSpawn: { bronze: 0, silver: 0.20, gold: 0 } },
+  4: { threshold: 4096, label: 'Stage 4', coinSpawn: { bronze: 0, silver: 0, gold: 0.10 } },
   5: { threshold: Infinity, label: 'Stage 5', coinSpawn: { bronze: 0.15, silver: 0.10, gold: 0.05 } },
 };
 
