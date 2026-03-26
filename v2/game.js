@@ -130,8 +130,8 @@ function spawnCoinForStage(stage, randomFn) {
 
   if (candidates.length === 0) return COIN_TYPES.NONE;
 
-  // If multiple coin types appear, pick the one with the lowest value (bronze=1 < silver=2 < gold=3)
-  // "lowest value takes precedence" means pick the smallest coin type number
+  // If multiple coin types appear, the block with the lowest point value takes precedence.
+  // Bronze (1pt) < Silver (2pt) < Gold (3pt), so pick the smallest coin type number.
   return Math.min(...candidates);
 }
 
