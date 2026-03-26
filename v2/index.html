@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>2048 V2</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="container">
+  <!-- Header -->
+  <div class="header">
+    <div class="title">2048</div>
+    <div class="scores">
+      <div class="score-box">Score<span class="value" id="score">0</span></div>
+      <div class="score-box">Best<span class="value" id="best">0</span></div>
+    </div>
+  </div>
+
+  <!-- Info bar: stage, coins, move counter -->
+  <div class="info-bar">
+    <div class="stage-indicator" id="stageIndicator">Stage 1</div>
+    <div class="coin-summary" id="coinSummary">
+      <span>🟡 <span id="goldCount">0</span></span>
+      <span>⚪ <span id="silverCount">0</span></span>
+      <span>🟤 <span id="bronzeCount">0</span></span>
+    </div>
+    <div class="move-counter" id="moveCounter">Moves: 0 | Harvest in: 30</div>
+  </div>
+
+  <!-- Subtitle -->
+  <div class="sub-header">
+    <div class="tagline">Join the numbers and get to the <b>2048 tile!</b></div>
+    <button class="new-game-btn" id="newGameBtn">New Game</button>
+  </div>
+
+  <!-- Board -->
+  <div class="board" id="board">
+    <div class="grid-bg">
+      <div class="cell-bg"></div><div class="cell-bg"></div><div class="cell-bg"></div><div class="cell-bg"></div>
+      <div class="cell-bg"></div><div class="cell-bg"></div><div class="cell-bg"></div><div class="cell-bg"></div>
+      <div class="cell-bg"></div><div class="cell-bg"></div><div class="cell-bg"></div><div class="cell-bg"></div>
+      <div class="cell-bg"></div><div class="cell-bg"></div><div class="cell-bg"></div><div class="cell-bg"></div>
+    </div>
+    <div class="tile-container" id="tileContainer"></div>
+
+    <!-- Win overlay -->
+    <div class="overlay" id="winOverlay">
+      <div class="msg">You win! 🎉</div>
+      <button id="keepGoingBtn">Keep going</button>
+      <button id="winNewGameBtn">New Game</button>
+    </div>
+
+    <!-- Lose overlay with score breakdown -->
+    <div class="overlay" id="loseOverlay">
+      <div class="msg">Game over!</div>
+      <div class="score-breakdown" id="scoreBreakdown"></div>
+      <button id="loseNewGameBtn">Try again</button>
+    </div>
+
+    <!-- Harvester overlay -->
+    <div class="harvester-overlay" id="harvesterOverlay">
+      <div class="harvester-icon">🌾</div>
+      <div class="harvester-text">Harvesting coins...</div>
+      <div class="harvester-coins-collected" id="harvesterCoinsCollected"></div>
+    </div>
+  </div>
+</div>
+
+<script src="game.js"></script>
+<script src="ui.js"></script>
+</body>
+</html>
