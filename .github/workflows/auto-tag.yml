@@ -1,0 +1,26 @@
+name: Auto Tag Generator
+
+on:
+  push:
+    branches:
+      - main # 如果你的主分支叫做 master，請將這裡改成 master
+
+jobs:
+  auto-increment-tag:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # 授權 GitHub Actions 寫入新的 Tag
+
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0 # 必須設定為 0，讓腳本能抓到所有歷史 Tag 以計算最新版本號
+
+    - name: Bump Version and Push Tag
+      uses: anothrNick/github-tag-action@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        DEFAULT_BUMP: patch    # 預設遞增最後一碼 (例如 v1.0.0 -> v1.0.1)
+        WITH_V: true           # Tag 名稱自動加上 'v' 前綴 (例如 v1.0.1)
+        INITIAL_VERSION: 1.0.0 # 如果這是全新的 Repo，第一個 Tag 會從 v1.0.0 開始
